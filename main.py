@@ -1,16 +1,21 @@
-# This is a sample Python script.
+from tools import *
 
-# Press Shift+F10 to execute it or replace it with your code.
-# Press Double Shift to search everywhere for classes, files, tool windows, actions, and settings.
-
-
-def print_hi(name):
-    # Use a breakpoint in the code line below to debug your script.
-    print(f'Hi, {name}')  # Press Ctrl+8 to toggle the breakpoint.
-
-
-# Press the green button in the gutter to run the script.
 if __name__ == '__main__':
-    print_hi('PyCharm')
+    p1 = wword("v0 ; v1")
+    p2 = wword("v0 ; v2")
 
-# See PyCharm help at https://www.jetbrains.com/help/pycharm/
+    comb = combine(p1,p2)
+
+    Buchi = DPA(["u0","u1","u2"], [], {
+                                   ("u0", ("v0", "v0")): "u0", ("u0", ("v1", "v0")): "u0", ("u0", ("v0", "v1")): "u0", ("u0", ("v1", "v1")): "u0",
+                                   ("u0",("v2","v0")): "u2", ("u0", ("v2", "v1")):"u2", ("u0", ("v2", "v2")):"u2",
+                                   ("u2", ("v0", "v0")): "u0", ("u2", ("v1", "v0")): "u0", ("u2", ("v0", "v1")): "u0",("u2", ("v1", "v1")): "u0",
+                                   ("u2", ("v2", "v0")):"u2", ("u2", ("v2","v1")):"u2",("u2", ("v2", "v2")) : "u2",
+                                   ("u2", ("v0", "v2")):"u1", ("u2", ("v1", "v2")):"u1",
+                                   ("u1", ("v2", "v0")): "u2", ("u1", ("v2", "v1")): "u1", ("u2", ("v2", "v2")): "u2",
+                                   ("u1", ("v0", "v2")): "u1", ("u1", ("v1", "v2")): "u1",
+                                   ("u1", ("v0", "v0")): "u0", ("u1", ("v1", "v0")): "u0", ("u1", ("v0", "v1")): "u0",("u1", ("v1", "v1")): "u0",
+                                   ("u0", ("v0", "v2")): "u1", ("u0", ("v1", "v2")): "u1",
+                                                       }, "u0", {"u0": 1,"u1": 2, "u2": 3})
+
+    print(Buchi.run(comb))
