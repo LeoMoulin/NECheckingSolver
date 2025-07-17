@@ -1,6 +1,7 @@
 # Représente un mot infini de la forme v..(w..)^w
 # Par exemple v0v1(v2v3)^w serait encodé de la forme v0 v1;v2 v3
 import math
+from collections import defaultdict
 
 
 class wword:
@@ -78,6 +79,100 @@ class Game():
     def setsucc(self, source, succlist):
         self.E[source] = succlist
 
+
+    #retourne un sous jeu contenant les éléments elems
+    def subgame(self, elems):
+        g_prime = Game()
+
+        for v in elems:
+            (owner, prio) = self.V[v]
+            g_prime.addVertex(v, owner, prio)
+
+        for v in elems:
+            for succ in self.E[v]:
+                if succ in elems:
+                    g_prime.addTransition(v, succ)
+
+        return g_prime
+
+
+
+class coalitional_game:
+    #Transforme un jeu G quelconque en jeu de coalition à deux joueurs ou la coalition joue contre le joueur p
+    def __init__(self, G : Game, p):
+        self.E = G.E
+
+        self.V0 = [(x[0], x[1][1]) for x in G.V.items() if G.getOwner(x[0]) == p]
+        self.V1 = [(x[0], x[1][1]) for x in G.V.items() if G.getOwner(x[0]) != p]
+
+
+    #Retourne la liste de predecesseurs d'un noeud w
+    def getPred(self, w):
+        l = []
+
+        for k, v in self.E.items():
+            if w in v:
+                l.append(v)
+
+        return v
+
+
+    def getOwner(self, v):
+        if v in self.V0:
+            return 0
+        else:
+            return 1
+
+    def opponent(self, p):
+        if p == 0:
+            return 1
+        else:
+            return 0
+
+    # Résous un reachability game à deux joueurs g = jeu, U = targetset, removed = noeuds enlevès du jeu,
+    # retourne les régions gagnantes et les stratégies pour les deux joueurs (joueur 0 ou joueur 1/la coalition)
+    def attractor(self, U, player):
+        out = {}
+
+        #On itére sur tous les sommets i.e l'union des deux listes ducoup
+        for (v, color) in self.V0+self.V1:
+            out[v] = len(self.E[v])
+
+        queue = []
+        regions = defaultdict(lambda: -1)
+
+        #Attracteur
+        W = []
+
+        opponent = self.opponent(player)
+
+        for node in U:
+            queue.append(node)
+            regions[node] = player #l'objectif est forcément dans la région gagnante vu que c'est reachability
+            W.append(node)
+
+        while queue:
+            s = queue.pop(0)
+
+            for sbis in self.getPred(s):
+                if regions[sbis] == -1:
+                    if self.getOwner(sbis) == player:
+                        queue.append(sbis)
+                        regions[sbis] = player
+                        W.append(sbis)
+
+                    elif self.getOwner(sbis) == opponent:
+                        out[sbis] -= 1
+                        if out[sbis] == 0:
+                            queue.append(sbis)
+                            regions[sbis] = player
+                            W.append(sbis)
+        w_bis = []
+        for node in self.V0 + self.V1:
+                if regions[node] != player:
+                    w_bis.append(node)
+
+        return (W, w_bis)
 
 # Représente un automate de parité déterministe
 class DPA:
@@ -175,7 +270,6 @@ class DPA:
 
         return h
 
-
 def cartesianProduct(L1, L2):
     L3 = []
 
@@ -202,7 +296,7 @@ def Tandany(elem, goal):
     return elem[0] == goal
 
 
-# Selon un jeu et la cible de l'objectif de Buci retourne l'automate de parité déterministe modélisant la relation de préférence correspondante
+# Selon un jeu et la cible de l'objectif de Buci complementé retourne l'automate de parité déterministe modélisant la relation de préférence correspondante
 def bucicomp(game: Game, target):
     A = DPA(["u0", "u1", "u2"], [], {}, "u0", {"u0": 2, "u1": 4, "u2": 3})
 
