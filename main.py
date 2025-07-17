@@ -48,3 +48,4 @@ if __name__ == '__main__':
     H_i = B_i.productGame(g, "v0")
 
     print(H_i.E)
+    print(H_i.V)

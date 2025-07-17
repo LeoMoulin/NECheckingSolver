@@ -72,7 +72,7 @@ class Game():
         self.E[source].append(destination)
 
     def getOwner(self, v):
-        return self.V[v][1]
+        return self.V[v][0]
 
     def setsucc(self, source, succlist):
         self.E[source] = succlist
