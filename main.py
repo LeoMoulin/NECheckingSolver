@@ -17,4 +17,8 @@ if __name__ == '__main__':
 
     h_i = b_i.productGame(g, "v0")
 
-    print(h_i.E)
+    ph_i = coalitional_game(h_i, 0)
+
+    (W1, W2) = ph_i.solveparity()
+
+    print(W1,W2)

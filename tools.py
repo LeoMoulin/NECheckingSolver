@@ -79,31 +79,22 @@ class Game():
     def setsucc(self, source, succlist):
         self.E[source] = succlist
 
-
-    #retourne un sous jeu contenant les éléments elems
-    def subgame(self, elems):
-        g_prime = Game()
-
-        for v in elems:
-            (owner, prio) = self.V[v]
-            g_prime.addVertex(v, owner, prio)
-
-        for v in elems:
-            for succ in self.E[v]:
-                if succ in elems:
-                    g_prime.addTransition(v, succ)
-
-        return g_prime
-
-
-
 class coalitional_game:
     #Transforme un jeu G quelconque en jeu de coalition à deux joueurs ou la coalition joue contre le joueur p
-    def __init__(self, G : Game, p):
-        self.E = G.E
+    def __init__(self, G : Game=None, p= None):
+        #Transforme un jeu existant en jeu de coalition
+        if G is not None and p is not None:
+            self.E = G.E
 
-        self.V0 = [(x[0], x[1][1]) for x in G.V.items() if G.getOwner(x[0]) == p]
-        self.V1 = [(x[0], x[1][1]) for x in G.V.items() if G.getOwner(x[0]) != p]
+            self.V0 = [(x[0], x[1][1]) for x in G.V.items() if G.getOwner(x[0]) == p]
+            self.V1 = [(x[0], x[1][1]) for x in G.V.items() if G.getOwner(x[0]) != p]
+
+        #Crée un jeu de coalition vide
+        else:
+            self.E = {}
+
+            self.V0 = []
+            self.V1 = []
 
 
     #Retourne la liste de predecesseurs d'un noeud w
@@ -129,8 +120,28 @@ class coalitional_game:
         else:
             return 0
 
-    # Résous un reachability game à deux joueurs g = jeu, U = targetset, removed = noeuds enlevès du jeu,
-    # retourne les régions gagnantes et les stratégies pour les deux joueurs (joueur 0 ou joueur 1/la coalition)
+    # retourne un sous jeu contenant les éléments elems
+    def subgame(self, elems):
+        g_prime = coalitional_game()
+
+        for v in elems:
+            if v[0] in self.V0:
+                g_prime.V0.append(v)
+            else:
+                g_prime.V1.append(v)
+
+            #initialise la liste des successeurs
+            g_prime.E[v[0]] = []
+
+        wanted_vertex = [x for x in elems]
+        for v in wanted_vertex:
+            for succ in self.E[v[0]]:
+                if succ in wanted_vertex:
+                    g_prime.E[v[0]].append(succ)
+
+        return g_prime
+
+    # Calcule l'attracteur du joueur player dans le jeu de coalition d'objectif d'atteignabilité sur l'ensemble U
     def attractor(self, U, player):
         out = {}
 
@@ -168,11 +179,83 @@ class coalitional_game:
                             regions[sbis] = player
                             W.append(sbis)
         w_bis = []
+
         for node in self.V0 + self.V1:
-                if regions[node] != player:
-                    w_bis.append(node)
+            if regions[node[0]] != player:
+                w_bis.append(node)
 
         return (W, w_bis)
+
+
+    #Résous le jeu de coalition de parité et renvoie les régions gagnantes pour les deux joueurs
+    def solveparity(self):
+        W1 = []
+        W2 = []
+
+        if len(self.V0+self.V1) == 0:
+            return W1, W2
+
+        else:
+            prios = [x[1] for x in self.V0+self.V1]
+            i = max(prios)
+
+            if i%2 == 0:
+                player = 0
+            else:
+                player = 1
+
+            op = self.opponent(player)
+
+            #On récupére tous les noeuds de priorité i et c'est la cible de l'attracteur
+            U = [x[0] for x in self.V0 + self.V1 if x[1] == i]
+
+            A, d1 = self.attractor(U, player)
+
+            g_a = self.subgame(d1)
+
+            sp_1, sp_2 = g_a.solveparity()
+
+            if player == 0:
+                W_player = sp_1
+                W_op = sp_2
+            else:
+                W_player = sp_2
+                W_op = sp_1
+
+            if not W_op:
+                if player == 0:
+                    W1.extend(A)
+                    W1.extend(W_player)
+                else:
+                    W2.extend(A)
+                    W2.extend(W_player)
+            else:
+                B, discard1 = self.attractor(W_op, op)
+                g_b = self.subgame(discard1)
+
+                sp_1, sp_2 = g_b.solveparity()
+
+                if player == 0:
+                    W_player = sp_1
+                    W_op = sp_2
+                else:
+                    W_player = sp_2
+                    W_op = sp_1
+
+                if player == 0:
+                    W1 = W_player
+
+                    W2.extend(W_op)
+                    W2.extend(B)
+
+                else:
+                    W2 = W_player
+
+                    W1.extend(W_op)
+                    W1.extend(B)
+
+        return W1, W2
+
 
 # Représente un automate de parité déterministe
 class DPA:
