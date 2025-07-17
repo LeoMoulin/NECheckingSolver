@@ -54,6 +54,28 @@ def combine(w1: wword, w2: wword):
 
     return w3
 
+class Game():
+    def __init__(self, rels: list=None):
+        # Modélise l'arène
+        # E = dico de la forme {noeud : [successeurs]}, V = dico de la forme {noeud:(owner, prio)}
+        self.E = {}
+        self.V = {}
+
+        # Liste de DPA qui représentent les relations de préférence pour chaque joueur
+        self.rels = rels
+
+    def addVertex(self, name, owner, prio):
+        self.V[name] = (owner, prio)
+        self.E[name] = []
+
+    def addTransition(self, source, destination):
+        self.E[source].append(destination)
+
+    def getOwner(self, v):
+        return self.V[v][1]
+
+    def setsucc(self, source, succlist):
+        self.E[source] = succlist
 
 # Représente un automate de parité déterministe
 class DPA:
@@ -95,7 +117,7 @@ class DPA:
         return (max(infColors) % 2) == 0
 
     # Retourne un autre automate de parité déterministe étant le produit entre l'automate et le lasso passé en paramètre
-    def product(self, lasso: wword):
+    def productLasso(self, lasso: wword):
         initial_state = (lasso.getElementAt(0), self.q0)
 
         # initialise l'automate qui contiendra le produit avec l'état initial (v0,q0)
@@ -126,15 +148,31 @@ class DPA:
         return A_prime
 
 
-class Game():
-    def __init__(self, V: dict, E: dict, rels: list):
-        # Modélise l'arène
-        # E = dico de la forme {noeud : [successeurs]}, V = dico de la forme {noeud:(owner, prio)}
-        self.E = E
-        self.V = V
+    def productGame(self, game:Game, v0):
+        h = Game()
 
-        # Liste de DPA qui représentent les relations de préférence pour chaque joueur
-        self.rels = rels
+        marque = {(v0, self.q0):True}
+        queue = []
+
+        h.addVertex((v0, self.q0), game.getOwner(v0), self.colors[self.q0])
+
+        queue.append((v0, self.q0))
+
+        while queue:
+            (v,q) = queue.pop(0)
+
+            q_prime = self.transit[(q, v)]
+
+            #Pour tout successeur de v dans le jeu
+            for succ in game.E[v]:
+                h.addTransition((v,q), (succ, q_prime))
+
+                if (succ, q_prime) not in marque.keys():
+                    h.addVertex((succ, q_prime), game.getOwner(succ), self.colors[q_prime])
+                    queue.append((succ, q_prime))
+                    marque[(succ,q_prime)] = True
+
+        return h
 
 
 def cartesianProduct(L1,L2):
