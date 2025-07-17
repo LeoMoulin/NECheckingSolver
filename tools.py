@@ -54,8 +54,9 @@ def combine(w1: wword, w2: wword):
 
     return w3
 
+
 class Game():
-    def __init__(self, rels: list=None):
+    def __init__(self, rels: list = None):
         # Modélise l'arène
         # E = dico de la forme {noeud : [successeurs]}, V = dico de la forme {noeud:(owner, prio)}
         self.E = {}
@@ -76,6 +77,7 @@ class Game():
 
     def setsucc(self, source, succlist):
         self.E[source] = succlist
+
 
 # Représente un automate de parité déterministe
 class DPA:
@@ -147,11 +149,10 @@ class DPA:
 
         return A_prime
 
-
-    def productGame(self, game:Game, v0):
+    def productGame(self, game: Game, v0):
         h = Game()
 
-        marque = {(v0, self.q0):True}
+        marque = {(v0, self.q0): True}
         queue = []
 
         h.addVertex((v0, self.q0), game.getOwner(v0), self.colors[self.q0])
@@ -159,23 +160,23 @@ class DPA:
         queue.append((v0, self.q0))
 
         while queue:
-            (v,q) = queue.pop(0)
+            (v, q) = queue.pop(0)
 
             q_prime = self.transit[(q, v)]
 
-            #Pour tout successeur de v dans le jeu
+            # Pour tout successeur de v dans le jeu
             for succ in game.E[v]:
-                h.addTransition((v,q), (succ, q_prime))
+                h.addTransition((v, q), (succ, q_prime))
 
                 if (succ, q_prime) not in marque.keys():
                     h.addVertex((succ, q_prime), game.getOwner(succ), self.colors[q_prime])
                     queue.append((succ, q_prime))
-                    marque[(succ,q_prime)] = True
+                    marque[(succ, q_prime)] = True
 
         return h
 
 
-def cartesianProduct(L1,L2):
+def cartesianProduct(L1, L2):
     L3 = []
 
     for e1 in L1:
@@ -183,3 +184,38 @@ def cartesianProduct(L1,L2):
             L3.append((e1, e2))
 
     return L3
+
+
+def notTnotT(elem, goal):
+    return elem[0] != goal and elem[1] != goal
+
+
+def notTbutT(elem, goal):
+    return elem[0] != goal and elem[1] == goal
+
+
+def TbutnotT(elem, goal):
+    return elem[0] == goal and elem[1] != goal
+
+
+def Tandany(elem, goal):
+    return elem[0] == goal
+
+
+# Selon un jeu et la cible de l'objectif de Buci retourne l'automate de parité déterministe modélisant la relation de préférence correspondante
+def bucicomp(game: Game, target):
+    A = DPA(["u0", "u1", "u2"], [], {}, "u0", {"u0": 2, "u1": 4, "u2": 3})
+
+    gamestates = [x for x in game.V.keys()]
+
+    A.addtransitionset("u0", "u0", notTnotT, target, cartesianProduct(gamestates, gamestates))
+    A.addtransitionset("u0", "u1", Tandany, target, cartesianProduct(gamestates, gamestates))
+    A.addtransitionset("u0", "u2", notTbutT, target, cartesianProduct(gamestates, gamestates))
+    A.addtransitionset("u1", "u1", Tandany, target, cartesianProduct(gamestates, gamestates))
+    A.addtransitionset("u1", "u0", notTnotT, target, cartesianProduct(gamestates, gamestates))
+    A.addtransitionset("u1", "u2", notTbutT, target, cartesianProduct(gamestates, gamestates))
+    A.addtransitionset("u2", "u2", notTbutT, target, cartesianProduct(gamestates, gamestates))
+    A.addtransitionset("u2", "u1", Tandany, target, cartesianProduct(gamestates, gamestates))
+    A.addtransitionset("u2", "u0", notTnotT, target, cartesianProduct(gamestates, gamestates))
+
+    return A
