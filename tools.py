@@ -73,6 +73,12 @@ class DPA:
     def addtransition(self, source, destination, label):
         self.transit[(source, label)] = destination
 
+    # func est une fct booléenne et alphabet est l'ensemble des labels possibles pour les transitions
+    def addtransitionset(self, source, destination, func, param, alphabet):
+        for sym in alphabet:
+            if func(sym, param):
+                self.addtransition(source, destination, sym)
+
     # run avec l'automate et un mot infini et retourne si le mot est accepté ou pas
     def run(self, word: wword):
         current = self.q0
@@ -129,3 +135,13 @@ class Game():
 
         # Liste de DPA qui représentent les relations de préférence pour chaque joueur
         self.rels = rels
+
+
+def cartesianProduct(L1,L2):
+    L3 = []
+
+    for e1 in L1:
+        for e2 in L2:
+            L3.append((e1, e2))
+
+    return L3
