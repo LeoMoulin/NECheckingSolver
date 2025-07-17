@@ -17,6 +17,12 @@ class wword:
             self.infiniteseg = [self.infiniteseg[i] for i in range(0, len(self.infiniteseg)) if
                                 self.infiniteseg[i] != ""]
 
+    #Retourne l'élément à la position index dans le mot infini
+    def getElementAt(self, index):
+        if index < len(self.finiteseg):
+            return self.finiteseg[index]
+
+        return self.infiniteseg[(index-len(self.finiteseg))%len(self.infiniteseg)]
 
 # Combine deux mots infinis pour les lire en même temps
 def combine(w1: wword, w2: wword):
@@ -57,6 +63,15 @@ class DPA:
         self.q0 = q0
         self.colors = colors
 
+    #Ajoute un état de label state et de priorité statecolor dans l'automate
+    def addstate(self, state, statecolor):
+        self.states.append(state)
+        self.colors[state] = statecolor
+
+    #Ajoute une transition du noeud source à destination en lisant label dans l'automate
+    def addtransition(self, source, destination, label):
+        self.transit[(source, label)] = destination
+
     # run avec l'automate et un mot infini et retourne si le mot est accepté ou pas
     def run(self, word: wword):
         current = self.q0
@@ -71,3 +86,50 @@ class DPA:
             infColors.append(self.colors[current])
 
         return (max(infColors) % 2) == 0
+
+    #Retourne un autre automate de parité déterministe étant le produit entre l'automate et le lasso passé en paramètre
+    def product(self, lasso:wword):
+        initial_state = (lasso.getElementAt(0), self.q0)
+
+        #initialise l'automate qui contiendra le produit avec l'état initial (v0,q0)
+        A_prime = DPA([initial_state], [], {}, initial_state, {initial_state: self.colors[initial_state[1]]})
+
+        #On enfile (state, position dans la 1ere composante dans le lasso) pour pouvoir prendre le bon successeur dans le lasso
+        queue = [(initial_state, 0)]
+        marque = {}
+
+        while queue:
+            ((v,u), pos) = queue.pop(0)
+
+            #Element suivant v dans le lasso ...vw...
+            succ = lasso.getElementAt(pos+1)
+
+            #on récupére les transitions de la forme u -> u' en lisant (v, v') avec v' quelconque
+            for key, val in self.transit.items(): #Pour rappel une antrée de self.transit est ici de la forme {(u, (v,v')) : u'}
+                #Si la transition permet de partir de u en lisant un couple de 1ere composante v
+                if key[1][0] == v and key[0] == u:
+                    #On ajoute une transition au produit
+                    A_prime.addtransition((v,u), (succ, val), key[1][1])
+
+                    if (succ,val) not in marque.keys():
+                        A_prime.addstate((succ,val), self.colors[val])
+                        queue.append(((succ,val), pos+1))
+                        marque[(v, u)] = True
+
+        return A_prime
+
+
+
+
+
+
+
+class Game():
+    def __init__(self, V: dict, E: dict, rels: list):
+        #Modélise l'arène
+        # E = dico de la forme {noeud : [successeurs]}, V = dico de la forme {noeud:(owner, prio)}
+        self.E = E
+        self.V = V
+
+        #Liste de DPA qui représentent les relations de préférence pour chaque joueur
+        self.rels = rels
