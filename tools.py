@@ -103,9 +103,9 @@ class coalitional_game:
 
         for k, v in self.E.items():
             if w in v:
-                l.append(v)
+                l.append(k)
 
-        return v
+        return l
 
 
     def getOwner(self, v):
@@ -133,10 +133,9 @@ class coalitional_game:
             #initialise la liste des successeurs
             g_prime.E[v[0]] = []
 
-        wanted_vertex = [x for x in elems]
-        for v in wanted_vertex:
+        for v in elems:
             for succ in self.E[v[0]]:
-                if succ in wanted_vertex:
+                if succ in elems:
                     g_prime.E[v[0]].append(succ)
 
         return g_prime
@@ -179,12 +178,11 @@ class coalitional_game:
                             regions[sbis] = player
                             W.append(sbis)
         w_bis = []
-
         for node in self.V0 + self.V1:
             if regions[node[0]] != player:
                 w_bis.append(node)
 
-        return (W, w_bis)
+        return W, w_bis
 
 
     #Résous le jeu de coalition de parité et renvoie les régions gagnantes pour les deux joueurs
@@ -233,25 +231,25 @@ class coalitional_game:
                 B, discard1 = self.attractor(W_op, op)
                 g_b = self.subgame(discard1)
 
-                sp_1, sp_2 = g_b.solveparity()
+                sp_1_, sp_2_ = g_b.solveparity()
 
                 if player == 0:
-                    W_player = sp_1
-                    W_op = sp_2
+                    W_playerbis = sp_1_
+                    W_opbis = sp_2_
                 else:
-                    W_player = sp_2
-                    W_op = sp_1
+                    W_playerbis = sp_2_
+                    W_opbis = sp_1_
 
                 if player == 0:
-                    W1 = W_player
+                    W1 = W_playerbis
 
-                    W2.extend(W_op)
+                    W2.extend(W_opbis)
                     W2.extend(B)
 
                 else:
-                    W2 = W_player
+                    W2 = W_playerbis
 
-                    W1.extend(W_op)
+                    W1.extend(W_opbis)
                     W1.extend(B)
 
         return W1, W2
