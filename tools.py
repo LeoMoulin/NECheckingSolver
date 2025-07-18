@@ -57,14 +57,14 @@ def combine(w1: wword, w2: wword):
 
 
 class Game():
-    def __init__(self, rels: list = None):
+    def __init__(self):
         # Modélise l'arène
         # E = dico de la forme {noeud : [successeurs]}, V = dico de la forme {noeud:(owner, prio)}
         self.E = {}
         self.V = {}
 
         # Liste de DPA qui représentent les relations de préférence pour chaque joueur
-        self.rels = rels
+        self.rels = {}
 
     def addVertex(self, name, owner, prio):
         self.V[name] = (owner, prio)
@@ -79,15 +79,22 @@ class Game():
     def setsucc(self, source, succlist):
         self.E[source] = succlist
 
+    #Set la relation de préférence rel comme la relation de préférence associée au joueur player
+    def setRelPref(self, rel, player):
+        self.rels[player] = rel
+
 class coalitional_game:
     #Transforme un jeu G quelconque en jeu de coalition à deux joueurs ou la coalition joue contre le joueur p
-    def __init__(self, G : Game=None, p= None):
+    def __init__(self, G: Game=None, p= None):
         #Transforme un jeu existant en jeu de coalition
         if G is not None and p is not None:
             self.E = G.E
 
-            self.V0 = [(x[0], x[1][1]) for x in G.V.items() if G.getOwner(x[0]) == p]
-            self.V1 = [(x[0], x[1][1]) for x in G.V.items() if G.getOwner(x[0]) != p]
+            #Coalition
+            self.V0 = [(x[0], x[1][1]) for x in G.V.items() if G.getOwner(x[0]) != p]
+
+            #Joueur
+            self.V1 = [(x[0], x[1][1]) for x in G.V.items() if G.getOwner(x[0]) == p]
 
         #Crée un jeu de coalition vide
         else:
@@ -109,7 +116,8 @@ class coalitional_game:
 
 
     def getOwner(self, v):
-        if v in self.V0:
+        wanted = [x[0] for x in self.V0]
+        if v in wanted:
             return 0
         else:
             return 1
@@ -178,8 +186,8 @@ class coalitional_game:
                             queue.append(sbis)
                             regions[sbis] = player
                             W.append(sbis)
-        w_bis = []
 
+        w_bis = []
         for node in self.V0 + self.V1:
             if regions[node[0]] != player:
                 w_bis.append(node)
@@ -209,7 +217,7 @@ class coalitional_game:
             #On récupére tous les noeuds de priorité i et c'est la cible de l'attracteur
             U = [x[0] for x in self.V0 + self.V1 if x[1] == i]
 
-            A, d1 = self.attractor(U, player)
+            A, d1 = self.attractor(U, player )
 
             g_a = self.subgame(d1)
 
@@ -253,7 +261,6 @@ class coalitional_game:
 
                     W1.extend(W_opbis)
                     W1.extend(B)
-
         return W1, W2
 
 

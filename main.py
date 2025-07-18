@@ -1,7 +1,8 @@
 from tools import *
+from algorithm import *
 
 if __name__ == '__main__':
-    pi = wword("v0 v3 ; v4")
+    pi = wword("v0 v1 ; v2")
     g = Game()
     g.V = {"v0": (0, None), "v1": (1, None), "v2": (0, None), "v3": (1, None), "v4": (0, None)}
 
@@ -11,16 +12,8 @@ if __name__ == '__main__':
     g.setsucc("v3", ["v4"])
     g.setsucc("v4", ["v4"])
 
-    a_comp = bucicomp(g, "v2")
+    g.setRelPref(bucicomp(g, "v2"), 0)
+    g.setRelPref(bucicomp(g, "v4"), 1)
 
-    b_i = a_comp.productLasso(pi)
-
-    h_i = b_i.productGame(g, "v0")
-
-    ph_i = coalitional_game(h_i, 0)
-
-    #Note : c'est bien le bon jeu y a un soucis dans l'algo ducoup
-    (W1, W2) = ph_i.solveparity()
-    print(W1)
-    print(W2)
+    isNashOutcome(pi, g)
 
