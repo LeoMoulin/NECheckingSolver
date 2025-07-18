@@ -21,6 +21,6 @@ if __name__ == '__main__':
 
     #Note : c'est bien le bon jeu y a un soucis dans l'algo ducoup
     (W1, W2) = ph_i.solveparity()
-
     print(W1)
     print(W2)
+

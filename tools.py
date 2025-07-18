@@ -133,9 +133,10 @@ class coalitional_game:
             #initialise la liste des successeurs
             g_prime.E[v[0]] = []
 
+        wanted = [x[0] for x in elems]
         for v in elems:
             for succ in self.E[v[0]]:
-                if succ in elems:
+                if succ in wanted:
                     g_prime.E[v[0]].append(succ)
 
         return g_prime
@@ -178,6 +179,7 @@ class coalitional_game:
                             regions[sbis] = player
                             W.append(sbis)
         w_bis = []
+
         for node in self.V0 + self.V1:
             if regions[node[0]] != player:
                 w_bis.append(node)
