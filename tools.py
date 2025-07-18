@@ -217,7 +217,7 @@ class coalitional_game:
             #On récupére tous les noeuds de priorité i et c'est la cible de l'attracteur
             U = [x[0] for x in self.V0 + self.V1 if x[1] == i]
 
-            A, d1 = self.attractor(U, player )
+            A, d1 = self.attractor(U, player)
 
             g_a = self.subgame(d1)
 
