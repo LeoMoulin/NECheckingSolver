@@ -43,10 +43,10 @@ class coalitional_game:
             self.E = G.E
 
             nodes = G.V.items()
-            # joueur
+            # coalition
             self.V0 = [(x[0], x[1][1]) for x in nodes if G.getOwner(x[0]) != p]
 
-            # Coalition
+            # joueur
             self.V1 = [(x[0], x[1][1]) for x in nodes if G.getOwner(x[0]) == p]
 
         # Création d'un jeu vide

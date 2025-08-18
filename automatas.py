@@ -153,7 +153,7 @@ class DPA:
             for succ in game.E[v]:
                 h.addTransition((v, q), (succ, q_prime))
 
-                # Vérifie si le nouvel état à déja été ajouté
+                # Vérifie si le nouvel état à déja été ajoutée
                 if (succ, q_prime) not in marque.keys():
                     h.addVertex((succ, q_prime), game.getOwner(succ), self.colors[q_prime])
                     queue.append((succ, q_prime))
