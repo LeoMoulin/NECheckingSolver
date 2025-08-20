@@ -69,6 +69,7 @@ class coalitional_game:
     # Retourne le joueur qui posséde le noeud v
     def getOwner(self, v):
         owned_list = [x[0] for x in self.V0]
+
         if v in owned_list:
             return 0
         else:
@@ -85,7 +86,7 @@ class coalitional_game:
         g_prime = coalitional_game()
 
         for v in elems:
-            if v[0] in self.V0:
+            if v in self.V0:
                 g_prime.V0.append(v)
             else:
                 g_prime.V1.append(v)
@@ -94,6 +95,7 @@ class coalitional_game:
             g_prime.E[v[0]] = []
 
         wanted_vertex = [x[0] for x in elems]
+
         #Si (v,v') est dans E et que v' est aussi a extraire pour le sous jeu on peut ajouter l'arc (v,v') au sous jeu
         for v in elems:
             for succ in self.E[v[0]]:
@@ -103,7 +105,7 @@ class coalitional_game:
         return g_prime
 
     # Calcule l'attracteur du joueur player dans le jeu de coalition d'objectif d'atteignabilité sur l'ensemble U
-    def attractor(self, U, player):
+    def reachability_solver(self, U, player):
         out = {}
 
         #Union des listes de sommets des deux joueurs
@@ -115,15 +117,21 @@ class coalitional_game:
         queue = []
         regions = defaultdict(lambda: -1)
 
-        #Attracteur
-        W = []
+        strat_player = {}
+        strat_opponent = {}
+
+        region_player = []
+        region_opponent = []
 
         opponent = self.opponent(player)
 
         for node in U:
             queue.append(node)
             regions[node] = player
-            W.append(node)
+            region_player.append(node)
+
+            if self.getOwner(node) == player:
+                strat_player[node] = self.E[node][0]
 
         while queue:
             s = queue.pop(0)
@@ -133,37 +141,50 @@ class coalitional_game:
                     if self.getOwner(sbis) == player:
                         queue.append(sbis)
                         regions[sbis] = player
-                        W.append(sbis)
+                        region_player.append(sbis)
+                        strat_player[sbis] = s
 
                     elif self.getOwner(sbis) == opponent:
                         out[sbis] -= 1
+
                         if out[sbis] == 0:
                             queue.append(sbis)
                             regions[sbis] = player
-                            W.append(sbis)
+                            region_player.append(sbis)
 
-        w_bis = []
         for node in V:
             if regions[node[0]] != player:
-                w_bis.append(node)
+                regions[node] = opponent
+                region_opponent.append(node)
 
-        return W, w_bis
+                if self.getOwner(node[0]) == opponent:
+                    for succ in self.E[node[0]]:
+                        if regions[succ] != player:
+                            strat_opponent[node[0]] = succ
+
+        return (region_player, strat_player), (region_opponent, strat_opponent)
 
 
     #Résous le jeu de coalition de parité et renvoie les régions gagnantes pour les deux joueurs
     def solveparity(self):
+        #Région gagnante et strat de la coalition
         W1 = []
+        strat1 = {}
+
+        #Région gagnante et strat du joueur
         W2 = []
+        strat2 = {}
 
         V = self.V0 + self.V1
 
         if len(V) == 0:
-            return W1, W2
+            return (W1, strat1), (W2,strat2)
 
         else:
             prios = [x[1] for x in V]
             i = max(prios)
 
+            #Le joueur 0 est la coalition car c'est celui qui a l'objectif pair
             if i%2 == 0:
                 player = 0
             else:
@@ -174,48 +195,63 @@ class coalitional_game:
             #On récupére tous les noeuds de priorité i et c'est la cible de l'attracteur
             U = [x[0] for x in V if x[1] == i]
 
-            A, d1 = self.attractor(U, player)
+            (A, tau1), (d1, d2) = self.reachability_solver(U, player)
 
             g_a = self.subgame(d1)
 
             sp_1, sp_2 = g_a.solveparity()
 
             if player == 0:
-                W_player = sp_1
-                W_op = sp_2
+                W_player, sig_player = sp_1
+                W_op, sig_op = sp_2
             else:
-                W_player = sp_2
-                W_op = sp_1
+                W_player, sig_player = sp_2
+                W_op, sig_op = sp_1
 
             if not W_op:
                 if player == 0:
                     W1.extend(A)
                     W1.extend(W_player)
+                    strat1.update(tau1)
+                    strat1.update(sig_player)
                 else:
                     W2.extend(A)
                     W2.extend(W_player)
+                    strat2.update(tau1)
+                    strat2.update(sig_player)
             else:
-                B, discard1 = self.attractor(W_op, op)
-                g_b = self.subgame(discard1)
+                (B, mu), (d1, d2) = self.reachability_solver(W_op, op)
+                g_b = self.subgame(d1)
 
                 sp_1_, sp_2_ = g_b.solveparity()
 
                 if player == 0:
-                    W_playerbis = sp_1_
-                    W_opbis = sp_2_
+                    W_playerbis, sig_playerbis = sp_1_
+                    W_opbis, sig_opbis = sp_2_
                 else:
-                    W_playerbis = sp_2_
-                    W_opbis = sp_1_
+                    W_playerbis, sig_playerbis = sp_2_
+                    W_opbis, sig_opbis = sp_1_
 
                 if player == 0:
                     W1 = W_playerbis
+                    strat1 = sig_playerbis
 
                     W2.extend(W_opbis)
                     W2.extend(B)
 
+                    strat2.update(mu)
+                    strat2.update(sig_opbis)
+                    strat2.update(sig_op)
                 else:
                     W2 = W_playerbis
 
+                    strat2 = sig_playerbis
+
                     W1.extend(W_opbis)
                     W1.extend(B)
-        return W1, W2
+
+                    strat1.update(mu)
+                    strat1.update(sig_opbis)
+                    strat1.update(sig_op)
+
+        return (W1,strat1), (W2,strat2)

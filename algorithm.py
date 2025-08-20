@@ -10,7 +10,6 @@ from automatas import *
 
 def is_nash_outcome(pi: wword, game: Arena):
     players = set([x[0] for x in game.V.values()])
-
     for p in players:
         # Récupére l'automate A déja complémenté TODO
         a = game.rels[p]
@@ -23,7 +22,7 @@ def is_nash_outcome(pi: wword, game: Arena):
         h_p = coalitional_game(h_p, p)
 
         # Applique zielonka pour récupérer les régions gagnantes
-        (W_b, W_a) = h_p.solveparity()
+        (W_b, sigb), (W_a, siga) = h_p.solveparity()
 
         # Parcours le lasso dans H et regarde si on passe dans la région gagnante du joueur B
         vertex = h_p.V0 + h_p.V1
