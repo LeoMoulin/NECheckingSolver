@@ -19,4 +19,4 @@ if __name__ == '__main__':
     res, machine = is_nash_outcome(pi, g)
 
     print(machine[1][0].movefunc)
-    print(machine[0][0].movefunc)
+    print(machine[1][1].movefunc)

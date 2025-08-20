@@ -28,19 +28,28 @@ def is_nash_outcome(pi: wword, game: Arena):
         (W_b, sigb), (W_a, siga) = h_p.solveparity()
 
         #Utilise h_p pour construire les machines de Mealy permettant aux autres joueurs de punir le joueur p
-        for (v,q),(v_prime, q_prime) in sigb.items():
-            x = game.getOwner(v)
+        for (v,q), desc in h_p.E.items():
+            for (v_prime, q_prime) in desc:
+                x = game.getOwner(v)
 
-            super_mealy_machine[x][p].add_state(q)
-            super_mealy_machine[x][p].add_state(q_prime)
-            super_mealy_machine[x][p].add_transition(v, v_prime, q, q_prime)
+                #Gére le bug au cas ou la clé n'existe pas dans le dico
+                if ((v,q) in sigb.keys()):
+                    opt_move = sigb[(v,q)]
+                else:
+                    opt_move = -1
 
-            #On update aussi les machines de punition des autres joueurs
-            others = [o for o in players if o != x]
-            for y in others:
-                super_mealy_machine[y][p].add_state(q)
-                super_mealy_machine[y][p].add_state(q_prime)
-                super_mealy_machine[y][p].add_transition(v, "*", q, q_prime)
+                if ((v,q) in W_b) and (opt_move == (v_prime, q_prime)):
+                    super_mealy_machine[x][p].add_state(q)
+                    super_mealy_machine[x][p].add_state(q_prime)
+                    super_mealy_machine[x][p].add_transition(v, v_prime, q, q_prime)
+
+                # On update aussi les machines de punition des autres joueurs
+                others = [o for o in players if o != x]
+                for y in others:
+                    super_mealy_machine[y][p].add_state(q)
+                    super_mealy_machine[y][p].add_state(q_prime)
+                    super_mealy_machine[y][p].add_transition(v, "*", q, q_prime)
+
 
         # Parcours le lasso dans H et regarde si on passe dans la région gagnante du joueur B tout en actualisant les machines de Mealy
         vertex = h_p.V0 + h_p.V1
