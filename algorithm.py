@@ -59,8 +59,8 @@ def is_nash_outcome(pi: wword, game: Arena):
         current = [v[0] for v in vertex if v[0][0] == start]
         current = current[0] #v,q
 
-        #On rajoute une fois le premier élément de la boucle à la fin sinon la boucle omet un élément
-        for v in (pi.finiteseg + pi.infiniteseg + [pi.infiniteseg[0]])[1:]:
+        #On parcours deux fois la partie infinie et une deuxième fois le premier élément pour que le programme puisse construire ce qu'il faut dans  (sinon il a pas le temps vu que ca boucle et il manque des états)
+        for v in (pi.finiteseg + pi.infiniteseg*2 + [pi.infiniteseg[0]])[1:]:
             if current in W_a:
                 print("Player " + str(p) + " is not cool with this")
                 return False

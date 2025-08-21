@@ -178,19 +178,19 @@ def cartesianProduct(L1, L2):
 
 
 def notTnotT(elem, goal):
-    return elem[0] != goal and elem[1] != goal
+    return elem[0] not in goal and elem[1] not in goal
 
 
 def notTbutT(elem, goal):
-    return elem[0] != goal and elem[1] == goal
+    return elem[0] not in goal and elem[1] in goal
 
 
 def TbutnotT(elem, goal):
-    return elem[0] == goal and elem[1] != goal
+    return elem[0] in goal and elem[1] not in goal
 
 
 def Tandany(elem, goal):
-    return elem[0] == goal
+    return elem[0] in goal
 
 
 # Selon un jeu et la cible de l'objectif de Buci complementé retourne l'automate de parité déterministe modélisant la relation de préférence correspondante

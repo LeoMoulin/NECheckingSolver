@@ -3,6 +3,7 @@ import unittest
 from algorithm import is_nash_outcome
 from games import *
 from automatas import *
+from mealymachine import mealy_machine
 
 """
     Implémente les tests unitaires des différentes classes
@@ -79,8 +80,8 @@ class TestAlgorithm(unittest.TestCase):
         g.setsucc("v3", ["v4"])
         g.setsucc("v4", ["v4"])
 
-        g.setRelPref(bucicomp(g, "v2"), 0)
-        g.setRelPref(bucicomp(g, "v4"), 1)
+        g.setRelPref(bucicomp(g, ["v2"]), 0)
+        g.setRelPref(bucicomp(g, ["v4"]), 1)
         self.assertEqual(False, is_nash_outcome(pi, g))
 
         # Exemple 2
@@ -93,6 +94,30 @@ class TestAlgorithm(unittest.TestCase):
         g2.setsucc("v3", ["v1", "v4"])
         g2.setsucc("v4", ["v4", "v3"])
 
-        g2.setRelPref(bucicomp(g2, "v2"), 0)
-        g2.setRelPref(bucicomp(g2, "v4"), 1)
-        self.assertEqual(True,is_nash_outcome(pi2, g2))
+        g2.setRelPref(bucicomp(g2, ["v2"]), 0)
+        g2.setRelPref(bucicomp(g2, ["v4"]), 1)
+        self.assertEqual(True,is_nash_outcome(pi2, g2)[0])
+
+        pi = wword("v0 ; v2 v3 v5")
+        g = Arena()
+        g.V = {"v0": (0, None), "v1": (1, None), "v2": (1, None), "v3": (0, None), "v5": (1, None), "v6": (0, None),
+               "v7": (0, None)}
+
+        g.setsucc("v0", ["v1", "v2"])
+        g.setsucc("v1", ["v7", "v6"])
+        g.setsucc("v2", ["v3"])
+        g.setsucc("v3", ["v5"])
+        g.setsucc("v5", ["v2"])
+        g.setsucc("v6", ["v6"])
+        g.setsucc("v7", ["v7"])
+
+        g.setRelPref(bucicomp(g, ["v7"]), 0)
+        g.setRelPref(bucicomp(g, ["v3"]), 1)
+        self.assertEqual(True, is_nash_outcome(pi, g)[0])
+
+        # On va modifier la super machine pour faire dévier le joueur 0 en v1
+        tau0 = mealy_machine([("v0", "u0"), "m1"], ("v0", "u0"), {}, {})
+        tau0.updatefunc = {(("v0", "u0"), "v0"): "m1"}
+        tau0.movefunc = {(("v0", "u0"), "v0"): "v1"}
+
+
