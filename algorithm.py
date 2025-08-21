@@ -11,7 +11,8 @@ from mealymachine import *
 def is_nash_outcome(pi: wword, game: Arena):
     players = set([x[0] for x in game.V.values()])
 
-    super_mealy_machine = [[mealy_machine([], "", {}, {}) for p in players] for p in players]
+    #Pour l'instant, on suppose que le jeu démarre en "v0" donc par construction l'état initial de h_p aura comme seconde composante (v0, q0)
+    super_mealy_machine = [[mealy_machine([], ("v0", "u0"), {}, {}) for p in players] for p in players]
 
     for p in players:
         # Récupére l'automate A déja complémenté TODO

@@ -1,4 +1,5 @@
 from algorithm import *
+from mealymachine import *
 
 if __name__ == '__main__':
     #Exemple 1
@@ -18,5 +19,10 @@ if __name__ == '__main__':
     g.setRelPref(bucicomp(g, "v3"), 1)
     res, machine = is_nash_outcome(pi, g)
 
-    print(machine[1][0].movefunc)
-    print(machine[1][1].movefunc)
+    #On va modifier la super machine pour faire dévier le joueur 0 en v1
+    tau0 = mealy_machine([("v0", "u0"), "m1"], ("v0", "u0"), {},{})
+    tau0.updatefunc = {(("v0", "u0"), "v0"): "m1", ("m1", "v1"): "m2", ("m2", "v7"): "m2", ("m2", "v6"): "m2"}
+    tau0.movefunc = {(("v0", "u0"), "v0"): "v1", ("m1", "v1"): "*", ("m2", "v7"): "v7", ("m2", "v6"): "v6"}
+
+    #machine[0][0] = tau0
+    simulation(g, machine, 10)
