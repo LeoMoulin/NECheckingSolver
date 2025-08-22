@@ -5,25 +5,25 @@ from collections import defaultdict
 class Arena():
     def __init__(self):
         # Modélise l'arène
-        # E = dico de la forme {noeud : [successeurs]}, V = dico de la forme {noeud:(owner, prio)}
-        self.E = {}
-        self.V = {}
+        # edges = dico de la forme {noeud : [successeurs]}, vertices = dico de la forme {noeud:(owner, prio)}
+        self.edges = {}
+        self.vertices = {}
 
         # Liste de DPA qui représentent les relations de préférence pour chaque joueur
         self.rels = {}
 
     def addVertex(self, name, owner, prio):
-        self.V[name] = (owner, prio)
-        self.E[name] = []
+        self.vertices[name] = (owner, prio)
+        self.edges[name] = []
 
     def addTransition(self, source, destination):
-        self.E[source].append(destination)
+        self.edges[source].append(destination)
 
     def getOwner(self, v):
-        return self.V[v][0]
+        return self.vertices[v][0]
 
     def setsucc(self, source, succlist):
-        self.E[source] = succlist
+        self.edges[source] = succlist
 
     #Définit la relation de préférence rel comme la relation de préférence associée au joueur player
     def setRelPref(self, rel, player):
@@ -40,9 +40,9 @@ class coalitional_game:
     def __init__(self, G: Arena=None, p= None):
         # Création à partir d'une arène
         if G is not None and p is not None:
-            self.E = G.E
+            self.edges = G.edges
 
-            nodes = G.V.items()
+            nodes = G.vertices.items()
             # coalition
             self.V0 = [(x[0], x[1][1]) for x in nodes if G.getOwner(x[0]) != p]
 
@@ -51,16 +51,16 @@ class coalitional_game:
 
         # Création d'un jeu vide
         else:
-            self.E = {}
+            self.edges = {}
 
             self.V0 = []
             self.V1 = []
 
     #Retourne la liste de predecesseurs d'un noeud w
-    def getPred(self, w):
+    def get_predecessors(self, w):
         l = []
 
-        for k, v in self.E.items():
+        for k, v in self.edges.items():
             if w in v:
                 l.append(k)
 
@@ -92,15 +92,15 @@ class coalitional_game:
                 g_prime.V1.append(v)
 
             #initialise la liste des successeurs
-            g_prime.E[v[0]] = []
+            g_prime.edges[v[0]] = []
 
         wanted_vertex = [x[0] for x in elems]
 
-        #Si (v,v') est dans E et que v' est aussi a extraire pour le sous jeu on peut ajouter l'arc (v,v') au sous jeu
+        #Si (v,v') est dans edges et que v' est aussi a extraire pour le sous jeu on peut ajouter l'arc (v,v') au sous jeu
         for v in elems:
-            for succ in self.E[v[0]]:
+            for succ in self.edges[v[0]]:
                 if succ in wanted_vertex:
-                    g_prime.E[v[0]].append(succ)
+                    g_prime.edges[v[0]].append(succ)
 
         return g_prime
 
@@ -112,7 +112,7 @@ class coalitional_game:
         V = self.V0+self.V1
 
         for (v, color) in V:
-            out[v] = len(self.E[v])
+            out[v] = len(self.edges[v])
 
         queue = []
         regions = defaultdict(lambda: -1)
@@ -131,12 +131,12 @@ class coalitional_game:
             region_player.append(node)
 
             if self.getOwner(node) == player:
-                strat_player[node] = self.E[node][0]
+                strat_player[node] = self.edges[node][0]
 
         while queue:
             s = queue.pop(0)
 
-            for sbis in self.getPred(s):
+            for sbis in self.get_predecessors(s):
                 if regions[sbis] == -1:
                     if self.getOwner(sbis) == player:
                         queue.append(sbis)
@@ -158,7 +158,7 @@ class coalitional_game:
                 region_opponent.append(node)
 
                 if self.getOwner(node[0]) == opponent:
-                    for succ in self.E[node[0]]:
+                    for succ in self.edges[node[0]]:
                         if regions[succ] != player:
                             strat_opponent[node[0]] = succ
 
@@ -166,7 +166,7 @@ class coalitional_game:
 
 
     #Résous le jeu de coalition de parité et renvoie les régions gagnantes pour les deux joueurs
-    def solveparity(self):
+    def parity_solver(self):
         #Région gagnante et strat de la coalition
         W1 = []
         strat1 = {}
@@ -199,7 +199,7 @@ class coalitional_game:
 
             g_a = self.subgame(d1)
 
-            sp_1, sp_2 = g_a.solveparity()
+            sp_1, sp_2 = g_a.parity_solver()
 
             if player == 0:
                 W_player, sig_player = sp_1
@@ -223,7 +223,7 @@ class coalitional_game:
                 (B, mu), (d1, d2) = self.reachability_solver(W_op, op)
                 g_b = self.subgame(d1)
 
-                sp_1_, sp_2_ = g_b.solveparity()
+                sp_1_, sp_2_ = g_b.parity_solver()
 
                 if player == 0:
                     W_playerbis, sig_playerbis = sp_1_

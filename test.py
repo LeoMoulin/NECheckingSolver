@@ -12,7 +12,7 @@ from mealymachine import mealy_machine
 class TestGames(unittest.TestCase):
     def test_coalitionalsubgame(self):
         arena = Arena()
-        arena.V = {"v0": (0, None), "v1": (1, None), "v2": (0, None), "v3": (1, None), "v4": (0, None), "v5":(1,None)}
+        arena.vertices = {"v0": (0, None), "v1": (1, None), "v2": (0, None), "v3": (1, None), "v4": (0, None), "v5":(1, None)}
 
         arena.setsucc("v0", ["v1"])
         arena.setsucc("v1", ["v2"])
@@ -31,10 +31,10 @@ class TestGames(unittest.TestCase):
 
         self.assertEqual([("v2",0), ("v3",1), ("v4",0), ("v5",1)], [x for x in subgame.V0 + subgame.V1])
 
-        self.assertEqual(["v3"], subgame.E["v2"])
-        self.assertEqual(["v4"], subgame.E["v3"])
-        self.assertEqual(["v5"], subgame.E["v4"])
-        self.assertEqual(["v2"], subgame.E["v5"])
+        self.assertEqual(["v3"], subgame.edges["v2"])
+        self.assertEqual(["v4"], subgame.edges["v3"])
+        self.assertEqual(["v5"], subgame.edges["v4"])
+        self.assertEqual(["v2"], subgame.edges["v5"])
 
 
 class TestAutomatas(unittest.TestCase):
@@ -72,7 +72,7 @@ class TestAlgorithm(unittest.TestCase):
         # Exemple 1
         pi = wword("v0 v3 ; v4")
         g = Arena()
-        g.V = {"v0": (0, None), "v1": (1, None), "v2": (0, None), "v3": (1, None), "v4": (0, None)}
+        g.vertices = {"v0": (0, None), "v1": (1, None), "v2": (0, None), "v3": (1, None), "v4": (0, None)}
 
         g.setsucc("v0", ["v1", "v3"])
         g.setsucc("v1", ["v2"])
@@ -87,7 +87,7 @@ class TestAlgorithm(unittest.TestCase):
         # Exemple 2
         pi2 = wword("v0 ; v1 v2")
         g2 = Arena()
-        g2.V = {"v0": (0, None), "v1": (1, None), "v2": (0, None), "v3": (0, None), "v4": (0, None)}
+        g2.vertices = {"v0": (0, None), "v1": (1, None), "v2": (0, None), "v3": (0, None), "v4": (0, None)}
         g2.setsucc("v0", ["v1"])
         g2.setsucc("v1", ["v2", "v3"])
         g2.setsucc("v2", ["v1"])
@@ -100,7 +100,7 @@ class TestAlgorithm(unittest.TestCase):
 
         pi = wword("v0 ; v2 v3 v5")
         g = Arena()
-        g.V = {"v0": (0, None), "v1": (1, None), "v2": (1, None), "v3": (0, None), "v5": (1, None), "v6": (0, None),
+        g.vertices = {"v0": (0, None), "v1": (1, None), "v2": (1, None), "v3": (0, None), "v5": (1, None), "v6": (0, None),
                "v7": (0, None)}
 
         g.setsucc("v0", ["v1", "v2"])

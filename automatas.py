@@ -150,7 +150,7 @@ class DPA:
             q_prime = self.transit[(q, v)]
 
             # Pour tout successeur de v dans le jeu
-            for succ in game.E[v]:
+            for succ in game.edges[v]:
                 h.addTransition((v, q), (succ, q_prime))
 
                 # Vérifie si le nouvel état à déja été ajoutée
@@ -197,7 +197,7 @@ def Tandany(elem, goal):
 def bucicomp(game: Arena, target):
     A = DPA(["u0", "u1", "u2"], [], {}, "u0", {"u0": 2, "u1": 4, "u2": 3})
 
-    gamestates = [x for x in game.V.keys()]
+    gamestates = [x for x in game.vertices.keys()]
     statesset = cartesianProduct(gamestates, gamestates)
 
     A.addtransitionset("u0", "u0", notTnotT, target, statesset)
