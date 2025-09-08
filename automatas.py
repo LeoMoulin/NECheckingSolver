@@ -193,8 +193,16 @@ def Tandany(elem, goal):
     return elem[0] in goal
 
 
-# Selon un jeu et la cible de l'objectif de Buci complementé retourne l'automate de parité déterministe modélisant la relation de préférence correspondante
-def bucicomp(game: Arena, target):
+def notTandany(elem, goal):
+    return elem[0] not in goal
+
+
+def anyandany(elem, goal):
+    return True
+
+
+#Retourne un DPA représentant un objectif de Buci pour le jeu donné et l'ensemble cible donné
+def buci_complemented(game: Arena, target):
     A = DPA(["u0", "u1", "u2"], [], {}, "u0", {"u0": 2, "u1": 4, "u2": 3})
 
     gamestates = [x for x in game.vertices.keys()]
@@ -209,5 +217,24 @@ def bucicomp(game: Arena, target):
     A.addtransitionset("u2", "u2", notTbutT, target, statesset)
     A.addtransitionset("u2", "u1", Tandany, target, statesset)
     A.addtransitionset("u2", "u0", notTnotT, target, statesset)
+
+    return A
+
+
+#Retourne un DPA représentant un objectif de reachability pour le jeu donné et l'ensemble cible donné
+def reachability_complemented(game: Arena, target):
+    A = DPA(["u0", "u1", "u2"], [], {}, "u0", {"u0": 2, "u1": 1, "u2": 2})
+
+    gamestates = [x for x in game.vertices.keys()]
+    statesset = cartesianProduct(gamestates, gamestates)
+
+    A.addtransitionset("u0", "u0", notTnotT, target, statesset)
+    A.addtransitionset("u0", "u1", notTbutT, target, statesset)
+    A.addtransitionset("u0", "u2", Tandany, target, statesset)
+
+    A.addtransitionset("u1", "u1", notTandany, target, statesset)
+    A.addtransitionset("u1", "u2", Tandany, target, statesset)
+
+    A.addtransitionset("u2", "u2", anyandany, target, statesset)
 
     return A

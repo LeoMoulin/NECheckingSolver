@@ -1,8 +1,10 @@
 from collections import defaultdict
-#Contiens les classes représentant les jeux en général
 
-#Modélise une arène
-class Arena():
+
+# Contiens les classes représentant les jeux en général
+
+# Modélise une arène
+class Arena:
     def __init__(self):
         # Modélise l'arène
         # edges = dico de la forme {noeud : [successeurs]}, vertices = dico de la forme {noeud:(owner, prio)}
@@ -25,11 +27,12 @@ class Arena():
     def setsucc(self, source, succlist):
         self.edges[source] = succlist
 
-    #Définit la relation de préférence rel comme la relation de préférence associée au joueur player
+    # Définit la relation de préférence rel comme la relation de préférence associée au joueur player
     def setRelPref(self, rel, player):
         self.rels[player] = rel
 
-#Modélise un jeu de coalition
+
+# Modélise un jeu de coalition
 class coalitional_game:
     """
         Permet de créer un jeu de coallition vide ou de
@@ -37,7 +40,8 @@ class coalitional_game:
 
         Ici le joueur 0 est la coalition et le joueur 1 est le joueur
     """
-    def __init__(self, G: Arena=None, p= None):
+
+    def __init__(self, G: Arena = None, p=None):
         # Création à partir d'une arène
         if G is not None and p is not None:
             self.edges = G.edges
@@ -56,7 +60,7 @@ class coalitional_game:
             self.V0 = []
             self.V1 = []
 
-    #Retourne la liste de predecesseurs d'un noeud w
+    # Retourne la liste de predecesseurs d'un noeud w
     def get_predecessors(self, w):
         l = []
 
@@ -91,12 +95,12 @@ class coalitional_game:
             else:
                 g_prime.V1.append(v)
 
-            #initialise la liste des successeurs
+            # initialise la liste des successeurs
             g_prime.edges[v[0]] = []
 
         wanted_vertex = [x[0] for x in elems]
 
-        #Si (v,v') est dans edges et que v' est aussi a extraire pour le sous jeu on peut ajouter l'arc (v,v') au sous jeu
+        # Si (v,v') est dans edges et que v' est aussi a extraire pour le sous jeu on peut ajouter l'arc (v,v') au sous jeu
         for v in elems:
             for succ in self.edges[v[0]]:
                 if succ in wanted_vertex:
@@ -108,8 +112,8 @@ class coalitional_game:
     def reachability_solver(self, U, player):
         out = {}
 
-        #Union des listes de sommets des deux joueurs
-        V = self.V0+self.V1
+        # Union des listes de sommets des deux joueurs
+        V = self.V0 + self.V1
 
         for (v, color) in V:
             out[v] = len(self.edges[v])
@@ -164,35 +168,34 @@ class coalitional_game:
 
         return (region_player, strat_player), (region_opponent, strat_opponent)
 
-
-    #Résous le jeu de coalition de parité et renvoie les régions gagnantes pour les deux joueurs
+    # Résous le jeu de coalition de parité et renvoie les régions gagnantes pour les deux joueurs
     def parity_solver(self):
-        #Région gagnante et strat de la coalition
+        # Région gagnante et strat de la coalition
         W1 = []
         strat1 = {}
 
-        #Région gagnante et strat du joueur
+        # Région gagnante et strat du joueur
         W2 = []
         strat2 = {}
 
         V = self.V0 + self.V1
 
         if len(V) == 0:
-            return (W1, strat1), (W2,strat2)
+            return (W1, strat1), (W2, strat2)
 
         else:
             prios = [x[1] for x in V]
             i = max(prios)
 
-            #Le joueur 0 est la coalition car c'est celui qui a l'objectif pair
-            if i%2 == 0:
+            # Le joueur 0 est la coalition car c'est celui qui a l'objectif pair
+            if i % 2 == 0:
                 player = 0
             else:
                 player = 1
 
             op = self.opponent(player)
 
-            #On récupére tous les noeuds de priorité i et c'est la cible de l'attracteur
+            # On récupére tous les noeuds de priorité i et c'est la cible de l'attracteur
             U = [x[0] for x in V if x[1] == i]
 
             (A, tau1), (d1, d2) = self.reachability_solver(U, player)
@@ -254,4 +257,4 @@ class coalitional_game:
                     strat1.update(sig_opbis)
                     strat1.update(sig_op)
 
-        return (W1,strat1), (W2,strat2)
+        return (W1, strat1), (W2, strat2)
