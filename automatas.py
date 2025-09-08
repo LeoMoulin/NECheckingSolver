@@ -180,6 +180,8 @@ def cartesianProduct(L1, L2):
 def notTnotT(elem, goal):
     return elem[0] not in goal and elem[1] not in goal
 
+def TandT(elem, goal):
+    return elem[0] in goal and elem[1] in goal
 
 def notTbutT(elem, goal):
     return elem[0] not in goal and elem[1] in goal
@@ -199,6 +201,12 @@ def notTandany(elem, goal):
 
 def anyandany(elem, goal):
     return True
+
+def anyandnotT(elem, goal):
+    return elem[1] not in goal
+
+def anyandT(elem, goal):
+    return elem[1] in goal
 
 
 #Retourne un DPA représentant un objectif de Buci pour le jeu donné et l'ensemble cible donné
@@ -236,5 +244,30 @@ def reachability_complemented(game: Arena, target):
     A.addtransitionset("u1", "u2", Tandany, target, statesset)
 
     A.addtransitionset("u2", "u2", anyandany, target, statesset)
+
+    return A
+
+
+#Retourne un DPA représentant un objectif de max-reward reachability pour le jeu donné et l'ensemble cible donné
+def maxrewardreachability_complemented(game:Arena, target):
+    A = DPA(["u0", "u1", "u2", "u3","u4"], [], {}, "u1", {"u0": 2, "u1": 1, "u2": 1, "u3":2, "u4":1})
+
+    gamestates = [x for x in game.vertices.keys()]
+    statesset = cartesianProduct(gamestates, gamestates)
+
+    A.addtransitionset("u0", "u0", anyandany, target, statesset)
+
+    A.addtransitionset("u1", "u0", TandT, target, statesset)
+    A.addtransitionset("u1", "u1", notTnotT, target, statesset)
+    A.addtransitionset("u1", "u2", notTbutT, target, statesset)
+    A.addtransitionset("u1", "u3", TbutnotT, target, statesset)
+
+    A.addtransitionset("u2", "u2", notTandany, target, statesset)
+    A.addtransitionset("u2", "u0", Tandany, target, statesset)
+
+    A.addtransitionset("u3", "u3", anyandnotT, target, statesset)
+    A.addtransitionset("u3", "u4", anyandT, target, statesset)
+
+    A.addtransitionset("u4", "u4", anyandany, target, statesset)
 
     return A
