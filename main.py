@@ -3,7 +3,7 @@ from mealymachine import *
 
 if __name__ == '__main__':
     #Exemple 1
-    pi = wword("v0 v1 v3 v7; v5 v6 v7")
+    pi = wword("v0 v1 v2 v3 v7;v5 v4")
     g = Arena()
     g.vertices = {"v0": (0, None), "v1": (1, None), "v2": (3, None), "v3": (2, None), "v4": (2, None), "v5": (1, None), "v6": (3, None),"v7": (0, None),"v8": (3, None),"v9": (1, None)}
 

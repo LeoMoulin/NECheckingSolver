@@ -229,7 +229,7 @@ def buci_complemented(game: Arena, target):
     return A
 
 
-#Retourne un DPA représentant un objectif de reachability pour le jeu donné et l'ensemble cible donné
+#Retourne un DPA représentant un objectif de reachability complémenté pour le jeu donné et l'ensemble cible donné
 def reachability_complemented(game: Arena, target):
     A = DPA(["u0", "u1", "u2"], [], {}, "u0", {"u0": 2, "u1": 1, "u2": 2})
 
@@ -248,7 +248,7 @@ def reachability_complemented(game: Arena, target):
     return A
 
 
-#Retourne un DPA représentant un objectif de max-reward reachability pour le jeu donné et l'ensemble cible donné
+#Retourne un DPA représentant un objectif de max-reward reachability complémenté pour le jeu donné et l'ensemble cible donné
 def maxrewardreachability_complemented(game:Arena, target):
     A = DPA(["u0", "u1", "u2", "u3","u4"], [], {}, "u1", {"u0": 2, "u1": 1, "u2": 1, "u3":2, "u4":1})
 

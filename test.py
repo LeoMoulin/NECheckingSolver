@@ -82,7 +82,7 @@ class TestAlgorithm(unittest.TestCase):
 
         g.setRelPref(buci_complemented(g, ["v2"]), 0)
         g.setRelPref(buci_complemented(g, ["v4"]), 1)
-        self.assertEqual(False, is_nash_outcome(pi, g))
+        self.assertEqual(False, is_nash_outcome(pi, g)[0])
 
         # Exemple 2
         pi2 = wword("v0 ; v1 v2")
@@ -134,7 +134,7 @@ class TestAlgorithm(unittest.TestCase):
         self.assertEqual(True, is_nash_outcome(pi,g)[0])
 
         pi = wword("v0 v1 v3 v7; v5 v6 v7")
-        pi2 = wword("v0 v1 v2 v3 v7;v5 v1")
+        pi2 = wword("v0 v1 v2 v3 v7;v5 v4")
 
         g = Arena()
         g.vertices = {"v0": (0, None), "v1": (1, None), "v2": (3, None), "v3": (2, None), "v4": (2, None),
@@ -157,5 +157,5 @@ class TestAlgorithm(unittest.TestCase):
         g.setRelPref(buci_complemented(g, ["v9"]), 3)
 
         self.assertEqual(True, is_nash_outcome(pi, g)[0])
-        self.assertEqual(False, is_nash_outcome(pi2, g))
+        self.assertEqual(False, is_nash_outcome(pi2, g)[0])
 

@@ -3,8 +3,8 @@ from mealymachine import *
 """
     pi : un lasso,
     game : une arène,
-    retourne si la partie est un outcome d'un équilibre de Nash
-    sinon renvoie le premier joueur trouvé qui à un déviation profitable
+    retourne (vrai, M) si on a un équilibre de nash et retourne (faux, None) sinon (M est l'ensemble des machines de 
+    Mealy pour chaque joueur.
 """
 
 
@@ -62,7 +62,7 @@ def is_nash_outcome(pi: wword, game: Arena):
         for v in (pi.finiteseg + pi.infiniteseg*2 + [pi.infiniteseg[0]])[1:]:
             if current in Win_region_a:
                 print("Player " + str(current_player) + " is not cool with this")
-                return False
+                return False, None
 
             # On avance dans le lasso et dans le jeu
             next = [x for x in automata_lasso_arena_product.edges[current] if x[0] == v] #v',q'
