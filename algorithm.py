@@ -27,7 +27,6 @@ def is_nash_outcome(pi: wword, game: Arena):
         # Applique zielonka pour récupérer les régions gagnantes (b = coalition, a = joueur)
         (Win_region_b, stratb), (Win_region_a, strata) = automata_lasso_arena_product.parity_solver()
 
-        print(Win_region_a)
         #Utilise h_p pour construire les machines de Mealy permettant aux autres joueurs de punir le joueur p
         for (v,q), desc in automata_lasso_arena_product.edges.items():
             for (v_prime, q_prime) in desc:
@@ -61,7 +60,6 @@ def is_nash_outcome(pi: wword, game: Arena):
 
         for v in (pi.finiteseg + pi.infiniteseg*2 + [pi.infiniteseg[0]])[1:]:
             if current in Win_region_a:
-                print("Player " + str(current_player) + " is not cool with this")
                 return False, None
 
             # On avance dans le lasso et dans le jeu
@@ -76,5 +74,4 @@ def is_nash_outcome(pi: wword, game: Arena):
             current = next[0]
 
     # Si on est arrivé ici alors c'est bon
-    print("Yes we have a NE outcome")
     return True, super_mealy_machine
