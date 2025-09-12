@@ -36,7 +36,7 @@ class mealy_machine:
 
 
 
-#Given a super mealy machine simulate what happens in each machine simultaneously (the game runs) for n actions
+#Simule une partie en suivant les stratégies via un ensemble de machines de Mealy
 def simulation(g:Arena, super_machine, n_tours):
     #Au début la machine de chaque joueur i est la machine en [i][i] (diagonale) current_machine est la colonne pour chaque joueur en gros
     current_machine = [i for i in range(len(super_machine))]

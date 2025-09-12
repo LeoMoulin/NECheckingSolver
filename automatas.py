@@ -32,7 +32,7 @@ class wword:
         return self.infiniteseg[(index - len(self.finiteseg)) % len(self.infiniteseg)]
 
 
-# Combine deux mots infinis pour les lire en même temps (useless au final)
+# Combine deux mots infinis pour les lire en même temps
 def combine(w1: wword, w2: wword):
     w3 = wword("")
 
@@ -209,7 +209,7 @@ def anyandT(elem, goal):
     return elem[1] in goal
 
 
-#Retourne un DPA représentant un objectif de Buci pour le jeu donné et l'ensemble cible donné
+#Retourne un DPA représentant un objectif de Buchi complémenté pour le jeu donné et l'ensemble cible donné
 def buci_complemented(game: Arena, target):
     A = DPA(["u0", "u1", "u2"], [], {}, "u0", {"u0": 2, "u1": 4, "u2": 3})
 

@@ -4,14 +4,14 @@ from mealymachine import *
     pi : un lasso,
     game : une arène,
     retourne (vrai, M) si on a un équilibre de nash et retourne (faux, None) sinon (M est l'ensemble des machines de 
-    Mealy pour chaque joueur.
+    Mealy pour chaque joueur).
 """
 
 
 def is_nash_outcome(pi: wword, game: Arena):
     players = set([x[0] for x in game.vertices.values()])
 
-    #Pour l'instant, on suppose que le jeu démarre en "v0" donc par construction l'état initial de h_p aura comme seconde composante (v0, q0)
+    #Suppose que le jeu démarre en v0
     super_mealy_machine = [[mealy_machine([], ("v0", "u0"), {}, {}) for p in players] for p in players]
 
     for current_player in players:
@@ -27,12 +27,13 @@ def is_nash_outcome(pi: wword, game: Arena):
         # Applique zielonka pour récupérer les régions gagnantes (b = coalition, a = joueur)
         (Win_region_b, stratb), (Win_region_a, strata) = automata_lasso_arena_product.parity_solver()
 
+        print(Win_region_a)
         #Utilise h_p pour construire les machines de Mealy permettant aux autres joueurs de punir le joueur p
         for (v,q), desc in automata_lasso_arena_product.edges.items():
             for (v_prime, q_prime) in desc:
                 x = game.getOwner(v)
 
-                #Gére le bug au cas ou la clé n'existe pas dans le dico
+                #Prévention d'erreur
                 if ((v,q) in stratb.keys()):
                     opt_move = stratb[(v,q)]
                 else:
@@ -58,7 +59,6 @@ def is_nash_outcome(pi: wword, game: Arena):
         current = [v[0] for v in vertex if v[0][0] == start]
         current = current[0] #v,q
 
-        #On parcours deux fois la partie infinie et une deuxième fois le premier élément pour que le programme puisse construire ce qu'il faut dans  (sinon il a pas le temps vu que ca boucle et il manque des états)
         for v in (pi.finiteseg + pi.infiniteseg*2 + [pi.infiniteseg[0]])[1:]:
             if current in Win_region_a:
                 print("Player " + str(current_player) + " is not cool with this")
